@@ -1,22 +1,22 @@
 function check!(rule_type::Type{FinalizerRule}, expr::EXPR)
     error_message = "`finalizer(_,_)`` should not be used"
-    generic_check!(rule_type, expr, "finalizer($placeholder_variable, $placeholder_variable)", error_message)
-    generic_check!(rule_type, expr, "finalizer($placeholder_variable) do $placeholder_variable $placeholder_vararg_variable end", error_message)
+    generic_check!(rule_type, expr, "finalizer($(placeholder.variable), $(placeholder.variable))", error_message)
+    generic_check!(rule_type, expr, "finalizer($(placeholder.variable)) do $(placeholder.variable) $(placeholder.vararg_variable) end", error_message)
 end
 
 function check!(rule_type::Type{AsyncRule}, expr::EXPR)
     error_message = "Use `@spawn` instead of `@async`"
-    generic_check!(rule_type, expr, "@async $placeholder_variable", error_message)
-    generic_check!(rule_type, expr, "Threads.@async $placeholder_variable", error_message)
+    generic_check!(rule_type, expr, "@async $(placeholder.variable)", error_message)
+    generic_check!(rule_type, expr, "Threads.@async $(placeholder.variable)", error_message)
 end
 
 function check!(rule_type::Type{CcallRule}, expr::EXPR)
     error_message = caution("ccall")
-    generic_check!(rule_type, expr, "ccall($placeholder_vararg_variable)", error_message)
+    generic_check!(rule_type, expr, "ccall($(placeholder.vararg_variable))", error_message)
 end
 
 function check!(rule_type::Type{InitializingWithFunctionRule}, expr::EXPR, markers::Dict{Marker, String})
-    if !haskey(markers, marker_const)
+    if !haskey(markers, marker.m_const)
         return
     end
 
@@ -26,11 +26,11 @@ function check!(rule_type::Type{InitializingWithFunctionRule}, expr::EXPR, marke
 end
 
 function check!(rule_type::Type{CFunctionRule}, expr::EXPR)
-    generic_check!(rule_type, expr, "@cfunction($placeholder_variable, $placeholder_vararg_variable)", "Macro `@cfunction` should not be used")
+    generic_check!(rule_type, expr, "@cfunction($(placeholder.variable), $(placeholder.vararg_variable))", "Macro `@cfunction` should not be used")
 end
 
 function check!(rule_type::Type{UnlockRule}, expr::EXPR)
-    generic_check!(rule_type, expr, "unlock($placeholder_variable)")
+    generic_check!(rule_type, expr, "unlock($(placeholder.variable))")
 end
 
 function check!(rule_type::Type{YieldRule}, expr::EXPR)
@@ -38,11 +38,11 @@ function check!(rule_type::Type{YieldRule}, expr::EXPR)
 end
 
 function check!(rule_type::Type{SleepRule}, expr::EXPR)
-    generic_check!(rule_type, expr, "sleep($placeholder_variable)")
+    generic_check!(rule_type, expr, "sleep($(placeholder.variable))")
 end
 
 function check!(rule_type::Type{InboundsRule}, expr::EXPR)
-    generic_check!(rule_type, expr, "@inbounds $placeholder_variable")
+    generic_check!(rule_type, expr, "@inbounds $(placeholder.variable)")
 end
 
 function check!(rule_type::Type{ArrayWithNoTypeRule}, expr::EXPR, markers::Dict{Marker, String})
@@ -50,7 +50,7 @@ function check!(rule_type::Type{ArrayWithNoTypeRule}, expr::EXPR, markers::Dict{
     #= haskey(markers, :filename) || return
     contains(markers[:filename], "src/Compiler") || return =#
 
-    value_of_filename = get(markers, marker_filename, nothing)
+    value_of_filename = get(markers, marker.filename, nothing)
     if isnothing(value_of_filename)
         return
     end
@@ -59,7 +59,7 @@ function check!(rule_type::Type{ArrayWithNoTypeRule}, expr::EXPR, markers::Dict{
         return
     end
 
-    value_of_macrocall = get(markers, marker_macrocall, nothing)
+    value_of_macrocall = get(markers, marker.macrocall, nothing)
 
     if !isnothing(value_of_macrocall)
         if value_of_macrocall == "@match" || value_of_macrocall == "@matchrule"
@@ -72,30 +72,30 @@ end
 
 function check!(rule_type::Type{ThreadsRule}, expr::EXPR)
     error_message = caution("@threads")
-    generic_check!(rule_type, expr, "Threads.@threads $placeholder_variable", error_message)
-    generic_check!(rule_type, expr, "@threads $placeholder_variable", error_message)
+    generic_check!(rule_type, expr, "Threads.@threads $(placeholder.variable)", error_message)
+    generic_check!(rule_type, expr, "@threads $(placeholder.variable)", error_message)
 end
 
 function check!(rule_type::Type{GeneratedRule}, expr::EXPR)
-    generic_check!(rule_type, expr, "@generated $placeholder_variable")
+    generic_check!(rule_type, expr, "@generated $(placeholder.variable)")
 end
 
 function check!(rule_type::Type{SyncRule}, expr::EXPR)
     error_message = caution("@sync")
-    generic_check!(rule_type, expr, "@sync $placeholder_variable", error_message)
-    generic_check!(rule_type, expr, "Threads.@sync $placeholder_variable", error_message)
+    generic_check!(rule_type, expr, "@sync $(placeholder.variable)", error_message)
+    generic_check!(rule_type, expr, "Threads.@sync $(placeholder.variable)", error_message)
 end
 
 function check!(rule_type::Type{RemovePageRule}, expr::EXPR)
-    generic_check!(rule_type, expr, "remove_page($placeholder_variable, $placeholder_variable)")
+    generic_check!(rule_type, expr, "remove_page($(placeholder.variable), $(placeholder.variable))")
 end
 
 function check!(rule_type::Type{TaskRule}, expr::EXPR)
-    generic_check!(rule_type, expr, "Task($placeholder_variable)")
+    generic_check!(rule_type, expr, "Task($(placeholder.variable))")
 end
 
 function check!(rule_type::Type{ErrorExceptionRule}, expr::EXPR, markers::Dict{Marker, String})
-    value_of_filename = get(markers, marker_filename, nothing)
+    value_of_filename = get(markers, marker.filename, nothing)
 
     if isnothing(value_of_filename)
         return
@@ -117,11 +117,11 @@ function check!(rule_type::Type{ErrorExceptionRule}, expr::EXPR, markers::Dict{M
         return
     end
 
-    generic_check!(rule_type, expr, "ErrorException($placeholder_vararg_variable)", "Use custom exception instead of generic `ErrorException`")
+    generic_check!(rule_type, expr, "ErrorException($(placeholder.vararg_variable))", "Use custom exception instead of generic `ErrorException`")
 end
 
 function check!(rule_type::Type{ErrorRule}, expr::EXPR, markers::Dict{Marker, String})
-    value_of_filename = get(markers, marker_filename, nothing)
+    value_of_filename = get(markers, marker.filename, nothing)
     if isnothing(value_of_filename)
         return
     end
@@ -142,11 +142,11 @@ function check!(rule_type::Type{ErrorRule}, expr::EXPR, markers::Dict{Marker, St
         return
     end
 
-    generic_check!(rule_type, expr, "error($placeholder_variable)", "Use custom exception instead of the generic `error()`")
+    generic_check!(rule_type, expr, "error($(placeholder.variable))", "Use custom exception instead of the generic `error()`")
 end
 
 function check!(rule_type::Type{UnsafeRule}, expr::EXPR, markers::Dict{Marker, String})
-    value_of_function = get(markers, marker_function, nothing)
+    value_of_function = get(markers, marker.m_function, nothing)
 
     if isnothing(value_of_function)
         return
@@ -162,35 +162,35 @@ function check!(rule_type::Type{UnsafeRule}, expr::EXPR, markers::Dict{Marker, S
         return
     end
 
-    generic_check!(rule_type, expr, "unsafe_$anymatch($placeholder_vararg_variable)", "an `unsafe_` function should be called only from an `unsafe_` function")
-    generic_check!(rule_type, expr, "_unsafe_$anymatch($placeholder_vararg_variable)", "an `unsafe_` function should be called only from an `unsafe_` function")
+    generic_check!(rule_type, expr, "unsafe_$(match.anymatch)($(placeholder.vararg_variable))", "an `unsafe_` function should be called only from an `unsafe_` function")
+    generic_check!(rule_type, expr, "_unsafe_$(match.anymatch)($(placeholder.vararg_variable))", "an `unsafe_` function should be called only from an `unsafe_` function")
 end
 
 function check!(rule_type::Type{InRule}, expr::EXPR)
     error_message = "use `tin(item, collection)` instead of Julia's `in` or `∈`"
 
-    generic_check!(rule_type, expr, "in($placeholder_variable, $placeholder_variable)", error_message)
-    generic_check!(rule_type, expr, "$placeholder_variable in $placeholder_variable", error_message)
-    generic_check!(rule_type, expr, "∈($placeholder_variable, $placeholder_variable)", error_message)
-    generic_check!(rule_type, expr, "$placeholder_variable ∈ $placeholder_variable", error_message)
+    generic_check!(rule_type, expr, "in($(placeholder.variable), $(placeholder.variable))", error_message)
+    generic_check!(rule_type, expr, "$(placeholder.variable) in $(placeholder.variable)", error_message)
+    generic_check!(rule_type, expr, "∈($(placeholder.variable), $(placeholder.variable))", error_message)
+    generic_check!(rule_type, expr, "$(placeholder.variable) ∈ $(placeholder.variable)", error_message)
 end
 
 function check!(rule_type::Type{HasKeyRule}, expr::EXPR)
     error_message = "use `thaskey(dict, key)` instead of Julia's haskey"
-    generic_check!(rule_type, expr, "haskey($placeholder_variable, $placeholder_variable)", error_message)
+    generic_check!(rule_type, expr, "haskey($(placeholder.variable), $(placeholder.variable))", error_message)
 end
 
 function check!(rule_type::Type{EqualRule}, expr::EXPR)
     error_message = "Use `tequal(dict,key)` instead of the Julia's `equal`"
-    generic_check!(rule_type, expr, "equal($placeholder_variable, $placeholder_variable)", error_message)
+    generic_check!(rule_type, expr, "equal($(placeholder.variable), $(placeholder.variable))", error_message)
 end
 
 function check!(rule_type::Type{UvRule}, expr::EXPR)
-    generic_check!(rule_type, expr, "uv_$anymatch($placeholder_vararg_variable)", caution("uv_"))
+    generic_check!(rule_type, expr, "uv_$(match.anymatch)($(placeholder.vararg_variable))", caution("uv_"))
 end
 
 function check!(rule_type::Type{SplattingRule}, expr::EXPR, markers::Dict{Marker, String})
-    value_of_filename = get(markers, marker_filename, nothing)
+    value_of_filename = get(markers, marker.filename, nothing)
     if isnothing(value_of_filename)
         return
     end
@@ -203,26 +203,26 @@ function check!(rule_type::Type{SplattingRule}, expr::EXPR, markers::Dict{Marker
         return
     end
 
-    if haskey(markers, marker_macro)
+    if haskey(markers, marker.m_macro)
         return
     end
 
     error_message = caution("Splatting(...)") * " platting from dynamically sized containers could result in severe performance degradation. Splatting from statically-sized tuples is usually okay. This lint rule cannot determine if this is dynamic or static, so please check carefully. See https://github.com/RelationalAI/RAIStyle#splatting for more information."
-    generic_check!(rule_type, expr, "$placeholder_variable($placeholder_vararg_variable...)", error_message)
+    generic_check!(rule_type, expr, "$(placeholder.variable)($(placeholder.vararg_variable)...)", error_message)
 
     generic_check!(
         rule_type,
         expr, 
-        "$placeholder_variable([$placeholder_variable($placeholder_vararg_variable) for $placeholder_variable in $placeholder_variable]...)",
+        "$(placeholder.variable)([$(placeholder.variable)($(placeholder.vararg_variable)) for $(placeholder.variable) in $(placeholder.variable)]...)",
         "Splatting (`...`) should not be used with dynamically sized containers. This may result in performance degradation. See https://github.com/RelationalAI/RAIStyle#splatting for more information.")
 end
 
 function check!(rule_type::Type{UnreachableBranchRule}, expr::EXPR)
     let template_code = """
-        if $(placeholder_variable)A
-            $placeholder_variable
-        elseif $(placeholder_variable)A
-            $placeholder_variable
+        if $(placeholder.variable)A
+            $(placeholder.variable)
+        elseif $(placeholder.variable)A
+            $(placeholder.variable)
         end
         """
     
@@ -230,12 +230,12 @@ function check!(rule_type::Type{UnreachableBranchRule}, expr::EXPR)
     end
 
     let template_code = """
-        if $(placeholder_variable)A
-            $placeholder_variable
-        elseif $placeholder_variable
-            $placeholder_variable
-        elseif $(placeholder_variable)A
-            $placeholder_variable
+        if $(placeholder.variable)A
+            $(placeholder.variable)
+        elseif $(placeholder.variable)
+            $(placeholder.variable)
+        elseif $(placeholder.variable)A
+            $(placeholder.variable)
         end
         """
         generic_check!(rule_type, expr, template_code, "Unreachable branch")
@@ -243,7 +243,7 @@ function check!(rule_type::Type{UnreachableBranchRule}, expr::EXPR)
 end
 
 function check!(rule_type::Type{StringInterpolationRule}, expr::EXPR)
-    if expr.head != Symbol(head_string_interpolation)
+    if expr.head != Symbol(head.string_interpolation)
         return
     end
 
@@ -252,18 +252,32 @@ function check!(rule_type::Type{StringInterpolationRule}, expr::EXPR)
     # if we find one, this means the string was incorrectly interpolated
 
     # The number of interpolations is the same than $ in trivia and arguments
-    dollars_count = length(filter(cst -> cst.head == Symbol(head_operator) && cst.val == raw"$", expr.trivia))
-    open_paren_count = length(filter(cst -> cst.head == Symbol(head_left_paren), expr.trivia))
+    trivia = expr.trivia # still cannot detect if expr.trivia is nothing or not
+    if isnothing(trivia)
+        return
+    end
+
+    dollars_count = let
+        predicate = cst -> cst.head == Symbol(head.operator) && cst.val == "\$"
+        collections = trivia
+        length(filter(predicate, collections))
+    end
+
+    open_paren_count = let
+        predicate = cst -> cst.head == Symbol(head.left_paren)
+        collections = trivia
+        length(filter(predicate, collections))
+    end
 
     if open_paren_count != dollars_count
-        seterror!(expr, LintRuleReport{StringInterpolationRule}(rule_type, error_message))
+        extension.seterror!(expr, LintError(rule_type, error_message))
     end
 end
 
 function check!(rule_type::Type{RelPathAPIUsageRule}, expr::EXPR, markers::Dict{Marker, String})
-    value_of_filename = get(markers, marker_filename, nothing)
+    value_of_filename = get(markers, marker.filename, nothing)
 
-    if !isnothing(value_of_filename)
+    if isnothing(value_of_filename)
         return
     end
 
@@ -271,17 +285,17 @@ function check!(rule_type::Type{RelPathAPIUsageRule}, expr::EXPR, markers::Dict{
         return
     end
 
-    generic_check!(rule_type, expr, "$placeholder_variable::RelPath", "usage of tpe `RelPath` is not allowed in this context")
-    generic_check!(rule_type, expr, "RelPath($placeholder_variable)", "usage of tpe `RelPath` is not allowed in this context")
-    generic_check!(rule_type, expr, "RelPath($placeholder_variable, $placeholder_variable)", "usage of tpe `RelPath` is not allowed in this context")
-    generic_check!(rule_type, expr, "split_path($placeholder_variable)", "usage of `RelPath` API method `split_path` is not allowed in this context")
-    generic_check!(rule_type, expr, "drop_first($placeholder_variable)", "usage of `RelPath` API method `drop_first` is not allowed in this context")
-    generic_check!(rule_type, expr, "relpath_from_signature($placeholder_variable)", "usage of `RelPath` API method `relpath_from_signature` is not allowed in this context")
+    generic_check!(rule_type, expr, "$(placeholder.variable)::RelPath", "usage of tpe `RelPath` is not allowed in this context")
+    generic_check!(rule_type, expr, "RelPath($(placeholder.variable))", "usage of tpe `RelPath` is not allowed in this context")
+    generic_check!(rule_type, expr, "RelPath($(placeholder.variable), $(placeholder.variable))", "usage of tpe `RelPath` is not allowed in this context")
+    generic_check!(rule_type, expr, "split_path($(placeholder.variable))", "usage of `RelPath` API method `split_path` is not allowed in this context")
+    generic_check!(rule_type, expr, "drop_first($(placeholder.variable))", "usage of `RelPath` API method `drop_first` is not allowed in this context")
+    generic_check!(rule_type, expr, "relpath_from_signature($(placeholder.variable))", "usage of `RelPath` API method `relpath_from_signature` is not allowed in this context")
 end
 
 function check!(rule_type::Type{NonFrontShapeAPIUsageRule}, expr::EXPR, markers::Dict{Marker, String})
-    value_of_filename = get(markers, marker_filename, nothing)
-    if !isnothing(value_of_filename)
+    value_of_filename = get(markers, marker.filename, nothing)
+    if isnothing(value_of_filename)
         return
     end
 
@@ -324,27 +338,27 @@ function check!(rule_type::Type{NonFrontShapeAPIUsageRule}, expr::EXPR, markers:
         return
     end
 
-    generic_check!(rule_type, expr, "shape_term($placeholder_vararg_variable)", "Usage of `shape_term` Shape API method is not allowed outside of the Front-end Compiler and FFI.")
-    generic_check!(rule_type, expr, "Front.shap_term($placeholder_vararg_variable)", "Usage of `shape_term` Shape API method is not allowed outside of the Front-end Compiler and FFI.")
-    generic_check!(rule_type, expr, "shape_splat($placeholder_vararg_variable)", "Usage of `shape_splat` Shape API method is not allowed outside of the Front-end Compiler and FFI.")
-    generic_check!(rule_type, expr, "Front.shape_splat($placeholder_vararg_variable)", "Usage of `shape_splat` Shape API method is not allowed outside of the Front-end Compiler and FFI.")
-    generic_check!(rule_type, expr, "ffi_shape_term($placeholder_vararg_variable)", "Usage of `ffi_shape_term` is not allowed outside of the Front-end Compiler and FFI.")
+    generic_check!(rule_type, expr, "shape_term($(placeholder.vararg_variable))", "Usage of `shape_term` Shape API method is not allowed outside of the Front-end Compiler and FFI.")
+    generic_check!(rule_type, expr, "Front.shap_term($(placeholder.vararg_variable))", "Usage of `shape_term` Shape API method is not allowed outside of the Front-end Compiler and FFI.")
+    generic_check!(rule_type, expr, "shape_splat($(placeholder.vararg_variable))", "Usage of `shape_splat` Shape API method is not allowed outside of the Front-end Compiler and FFI.")
+    generic_check!(rule_type, expr, "Front.shape_splat($(placeholder.vararg_variable))", "Usage of `shape_splat` Shape API method is not allowed outside of the Front-end Compiler and FFI.")
+    generic_check!(rule_type, expr, "ffi_shape_term($(placeholder.vararg_variable))", "Usage of `ffi_shape_term` is not allowed outside of the Front-end Compiler and FFI.")
     generic_check!(rule_type, expr, "Shape", "Usage of `Shape` is not allowed outside of the Front-end Compiler and FFI.")
 end
 
 function check!(rule_type::Type{InterpolationInSafeLogRule}, expr::EXPR)
-    generic_check!(rule_type, expr, "@warnv_safe_to_log $placeholder_variable \"$placeholder_string_interpolation\"", "Safe warning log has interpolation.")
+    generic_check!(rule_type, expr, "@warnv_safe_to_log $(placeholder.variable) \"$(placeholder.string_interpolation)\"", "Safe warning log has interpolation.")
 end
 
 function check!(rule_type::Type{UseOfStaticThreads}, expr::EXPR)
     error_message = "Use `Threads.@threads :dynamic` instead of `Threads.@threads :static`. Static threads must not be used as generated tasks will not be able to migrate across threads."
 
-    generic_check!(rule_type, expr, "@threads :static $placeholder_vararg_variable", error_message)
-    generic_check!(rule_type, expr, "Threads.@threads :static $placeholder_vararg_variable", error_message)
+    generic_check!(rule_type, expr, "@threads :static $(placeholder.vararg_variable)", error_message)
+    generic_check!(rule_type, expr, "Threads.@threads :static $(placeholder.vararg_variable)", error_message)
 end
 
 function check!(rule_type::Type{LogStatementsMustBeSafe}, expr::EXPR, markers::Dict{Marker, String})
-    value_of_filename = get(markers, marker_filename, nothing)
+    value_of_filename = get(markers, marker.filename, nothing)
 
     if !isnothing(value_of_filename)
         if contains(value_of_filename, "test/")
@@ -358,50 +372,84 @@ function check!(rule_type::Type{LogStatementsMustBeSafe}, expr::EXPR, markers::D
 
     error_message = "Unsafe logging statement. You must enclose variables and strings with `@safe(...)`."
 
+    if expr.head != head.to_symbol(head.macrocall)
+        return
+    end
+
+    args = expr.args
+    if isnothing(args)
+        return
+    end
+
+    if args[1].head != head.to_symbol(head.identifier)
+        return
+    end
+
+    val = args[1].val
+    if isnothing(val)
+        return
+    end
     # @info and its friends
-    if expr.head == Symbol(head_macrocall) && expr.args[1].head == Symbol(head_identifier) && startswith(expr.args[1].val, "@info")
-        if !all_arguments_safe(expr)
-            seterror!(expr, LintRuleReport{LogStatementsMustBeSafe}(rule_type, error_message))
+    
+    
+    if startswith(val, "@info")
+        if !extension.all_arguments_safe(expr)
+            extension.seterror!(expr, LintError(rule_type, error_message))
         end
     end
 
     # @debug and its friends
-    if expr.head == Symbol(head_macrocall) && expr.args[1].head == Symbol(head_identifier) && startswith(expr.args[1].val, "@debug")
-        if !all_arguments_safe(expr)
-            seterror!(expr, LintRuleReport{LogStatementsMustBeSafe}(rule_type, error_message))
+    if startswith(val, "@debug")
+        if !extension.all_arguments_safe(expr)
+            extension.seterror!(expr, LintError(rule_type, error_message))
         end
     end
 
     # @error and its friends
-    if expr.head == Symbol(head_macrocall) && expr.args[1].head == Symbol(head_identifier) && startswith(expr.args[1].val, "@error")
-        if !all_arguments_safe(expr)
-            seterror!(expr, LintRuleReport{LogStatementsMustBeSafe}(rule_type, error_message))
+    if startswith(val, "@error")
+        if !extension.all_arguments_safe(expr)
+            extension.seterror!(expr, LintError(rule_type, error_message))
         end
     end
 
     # @warn and its friends
-    if expr.head == Symbol(head_macrocall) && expr.args[1].head == Symbol(head_identifier) && startswith(expr.args[1].val, "@warn")
-        if !all_arguments_safe(expr)
-            seterror!(expr, LintRuleReport{LogStatementsMustBeSafe}(rule_type, error_message))
+    if startswith(val, "@warn")
+        if !extension.all_arguments_safe(expr)
+            extension.seterror!(expr, LintError(rule_type, error_message))
         end
     end
 end
 
 function check!(rule_type::Type{AssertionStatementsMustBeSafe}, expr::EXPR, markers::Dict{Marker, String})
-    value_of_filename = get(markers, marker_filename, nothing)
+    value_of_filename = get(markers, marker.filename, nothing)
     if !isnothing(value_of_filename)
         if contains(value_of_filename, "test/")
             return
         end
     end
 
-    error_message = "Unsafe assertion statement. You must enclose the message `@safe(...)`."
-    if expr.head == Symbol(head_macrocall) &&
-        expr.args[1].head == Symbol(head_identifier) &&
-        (startswith(expr.args[1].val, "@assert") || startswith(expr.args[1].val, "@dassert"))
+    if expr.head != head.to_symbol(head.macrocall)
+        return
+    end
 
-        if !all_arguments_safe(expr; skip_first_arg = true)
-            seterror!(expr, LintRuleReport{AssertionStatementsMustBeSafe}(rule_type, error_message))
+    args = expr.args
+    if isnothing(args)
+        return
+    end
+
+    if args[1].head != head.to_symbol(head.identifier)
+        return
+    end
+
+    val = args[1].val
+    if isnothing(val)
+        return
+    end
+
+    if startswith(val, "@assert") || startswith(val, "@dassert")
+        if !extension.all_argument_safe(expr; skip_first_arg = true)
+            error_message = "Unsafe assertion statement. You must enclose the message `@safe(...)`."
+            extension.seterror!(expr, LintError(rule_type, error_message))
         end
     end
 end
@@ -409,33 +457,33 @@ end
 function check!(rule_type::Type{MustNotUseShow}, expr::EXPR)
     error_message = "Do not use `@show`, use `@info` instead."
 
-    generic_check!(rule_type, expr, "@show $placeholder_variable", error_message)
+    generic_check!(rule_type, expr, "@show $(placeholder.variable)", error_message)
 end
 
 
 function check!(rule_type::Type{NoinlineAndLiteralRule}, expr::EXPR)
-    if is_match_template_code(expr, "@noinline $placeholder_variable($placeholder_vararg_variable) = $placeholder_vararg_variable")
+    if match.match_template(expr, "@noinline $(placeholder.variable)($(placeholder.vararg_variable)) = $(placeholder.vararg_variable)")
         return
     end
 
-    if expr.head == Symbol(head_macrocall) &&
-        expr.args[1].head == Symbol(head_identifier) &&
+    if expr.head == Symbol(head.macrocall) &&
+        expr.args[1].head == Symbol(head.identifier) &&
         expr.args[1].val == "@noinline"
 
         # Are we in a function definition?
-        function_def = fetch_value(expr, head_function, false)
+        function_def = extension.fetch_value(expr, head.function, false)
         if !isnothing(function_def)
             return
         end
 
         # Retrieve function call below the @noinline macro
-        fetch_call = fetch_value(expr, head_call, false, 1)
+        fetch_call = extension.fetch_value(expr, head.call, false, 1)
         error_message = "For call-site `@noinline` call, all args must be literals or identifiers only. \
         Pull complex args out to top-level. [RAI-35086](https://relationalai.atlassian.net/browse/RAI-35086)."
 
         # We found no function call, check for a macro call then
         if isnothing(fetch_call)
-            macro_call = fetch_value(expr, head_macrocall, false, -1, true)
+            macro_call = extension.fetch_value(expr, head.macrocall, false, -1, true)
 
             # If we have not found a macro call, then we merely exit.
             # could happen with `@noinline 42` for example
@@ -444,10 +492,10 @@ function check!(rule_type::Type{NoinlineAndLiteralRule}, expr::EXPR)
             end
             
             # we found a macro call
-            seterror!(expr, LintRuleReport{NoinlineAndLiteralRule}(rule_type, error_message))
+            extension.seterror!(expr, LintError{NoinlineAndLiteralRule}(rule_type, error_message))
         else
-            if !all_arguments_literal_or_identifier(fetch_call)
-                seterror!(expr, LintRuleReport{NoinlineAndLiteralRule}(rule_type, error_message))
+            if !extension.all_arguments_literal_or_identifier(fetch_call)
+                extension.seterror!(expr, LintError(rule_type, error_message))
             end
         end
         
@@ -455,30 +503,30 @@ function check!(rule_type::Type{NoinlineAndLiteralRule}, expr::EXPR)
 end
 
 function check!(rule_type::Type{NoReturnInAnonymousFunctionRule}, expr::EXPR, markers::Dict{Marker, String})
-    value_of_filename = get(markers, marker_filename, nothing)
+    value_of_filename = get(markers, marker.filename, nothing)
     if !isnothing(value_of_filename)
         if contains(value_of_filename, "test/")
             return
         end
     end
 
-    if !haskey(markers, marker_anonymous_function)
+    if !haskey(markers, marker.anonymous_function)
         return
     end
 
     error_message = "Anonymous function must not have `return` [Explanation](https://github.com/RelationalAI/RAIStyle#returning-from-a-closure)."
-    generic_check!(rule_type, expr, "return $placeholder_variable", error_message)
+    generic_check!(rule_type, expr, "return $(placeholder.variable)", error_message)
 end
 
 function check!(rule_type::Type{NoImportRule}, expr::EXPR)
     error_message = "Imports must be specified using `using` and not `import` [Explanation](https://github.com/RelationalAI/RAIStyle?tab=readme-ov-file#module-imports)."
-    generic_check!(rule_type, expr, "import $placeholder_variable", error_message)
+    generic_check!(rule_type, expr, "import $(placeholder.variable)", error_message)
 
     # Arbitrary number of hole variables
     # TODO: This is hacky and it deserves a better solution.
     for index in 1:15
-        placeholders = join(map(_ -> "$placeholder_variable", 1:index), ", ")
-        template_code = "import $placeholder_variable: $placeholders"
+        placeholders = join(map(_ -> "$(placeholder.variable)", 1:index), ", ")
+        template_code = "import $(placeholder.variable): $placeholders"
         generic_check!(rule_type, expr, template_code, error_message)
     end
 end
@@ -489,7 +537,7 @@ function check!(rule_type::Type{NotImportingRAICodeRule}, expr::EXPR)
     # Arbitrary number of hole variables
     # TODO: This is hacky and it deserves a better solution.
     for index in 1:15
-        placeholders = join(map(_ -> "$placeholder_variable", 1:index), ", ")
+        placeholders = join(map(_ -> "$(placeholder.variable)", 1:index), ", ")
         template_code = "using RAICode: $placeholders"
         generic_check!(rule_type, expr, template_code, error_message)
     end

@@ -1,9 +1,3 @@
-abstract type LintRule end
-abstract type ASTLintRule <: LintRule end
-abstract type RecommendationLintRule <: ASTLintRule end
-abstract type ViolationLintRule <: ASTLintRule end
-abstract type FatalLintRule <: ASTLintRule end
-
 struct AsyncRule <: ViolationLintRule end
 struct CcallRule <: RecommendationLintRule end
 struct InitializingWithFunctionRule <: ViolationLintRule end
@@ -40,19 +34,3 @@ struct NoinlineAndLiteralRule <: FatalLintRule end
 struct NoReturnInAnonymousFunctionRule <: FatalLintRule end
 struct NoImportRule <: ViolationLintRule end
 struct NotImportingRAICodeRule <: ViolationLintRule end
-
-
-
-import InteractiveUtils: subtypes
-
-const all_rules = Ref{Vector{Type{LintRule}}}(
-    vcat(
-        subtypes(RecommendationLintRule),
-        subtypes(ViolationLintRule),
-        subtypes(FatalLintRule)
-    )
-)
-
-function get_all_rules()::Vector{Type{LintRule}}
-    return all_rules[]
-end

@@ -1,12 +1,15 @@
-module Lint
+module Lint # Core Module here
 
-const anymatch = "QQQ" # original: `star_marker`
-
-include("input/lib.jl")
-include("core/lib.jl")
-include("output/lib.jl")
+include("utils/utils.jl")
+include("constants/constants.jl")
+include("rules/rules.jl")
 
 
+include("output/output.jl")
+include("matching/matching.jl")
+include("extension/extension.jl")
 
+include("checks/checks.jl")
+include("lint/lint.jl")
 
-end # module Lint
+end
