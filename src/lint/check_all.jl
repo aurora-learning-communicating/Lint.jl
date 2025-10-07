@@ -23,7 +23,8 @@ function check_all!(expr::EXPR, markers::Dict{Marker, String}, context::Context)
     end
 
     for T in filter(rule_type -> rule_type <: rules.ASTLintRule, context.rules)
-        check!(T, expr, markers) # TODO: 参数不匹配，需要接口定义
+        check = Check(T, markers)
+        check!(check, expr)
 
         if extension.haserror(expr) && expr.meta.error isa LintError
             lint_report = expr.meta.error

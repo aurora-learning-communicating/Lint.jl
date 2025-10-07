@@ -20,3 +20,7 @@ function match_value(left::String, right::String)::Bool
         !isnothing(match(regex, left))
     end
 end
+
+function match_value(left::Any, right::Any)::Bool
+    return left == right
+end

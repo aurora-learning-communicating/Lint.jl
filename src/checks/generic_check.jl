@@ -1,5 +1,5 @@
 function generic_check!(rule_type::Type{T}, expr::EXPR, template_code::String, error_message::String) where T <: LintRule
-    if match.match_template(expr, template_code)
+    if matching.match_template(expr, template_code)
         extension.seterror!(expr, LintError(rule_type, error_message))
     end
 end

@@ -5,6 +5,7 @@ function match_pattern(left::EXPR, right::EXPR)::Bool
     result = match_structure(left, right, named_variable_placeholders)
 
     # If there is no or only one named variable hole, then we can exit
+
     if length(named_variable_placeholders) <= 1
         return result
     end

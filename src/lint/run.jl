@@ -37,6 +37,6 @@ function run(rootpath::String, context::Context)::Vector{LintError}
     return reports
 end
 
-function offset_to_line(offset::Int, lines::Vector{AbstractString})::Tuple{Int, Int, Union{Nothing, String}}
+function offset_to_line(offset::Int, lines::Vector{<:AbstractString})::Tuple{Int, Int, Union{Nothing, String}}
     error("not implement yet")
 end

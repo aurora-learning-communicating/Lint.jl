@@ -7,7 +7,7 @@ import ..rules: LintRule
 import ..extension
 import ..utils: FileExclusion
 import ..constants: head, marker as marker, placeholder
-import ..checks: check!
+import ..checks: check!, Check
 import ..output: LintError
 import .marker: Marker
 

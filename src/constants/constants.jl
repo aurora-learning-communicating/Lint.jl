@@ -27,7 +27,7 @@ end
 
 function is_variable(expr::EXPR)::Bool
     return expr.head == head.identifier &&
-        expr.val == placeholder.variable
+        (expr.val == placeholder.variable || expr.val == placeholder.vararg_variable)
 end
 
 function is_vararg_variable(expr::EXPR)::Bool
